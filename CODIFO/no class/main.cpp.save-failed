@@ -1,0 +1,277 @@
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include "Barra.h"
+#include "Pelota.h"
+#include "Global.h"
+#include "Bloque.h"
+#include"Menu.h"
+#include <iostream>
+
+using namespace std;
+
+using namespace sf;
+
+int main()
+{
+
+    int vida = 5;
+
+    Barra obj1;
+    obj1.setSize(100, 20);
+    obj1.setPosition(ANCHO / 2, ALTO - obj1.barraShape.getSize().y);
+
+
+
+    RenderWindow ventana(VideoMode(ANCHO, ALTO), " Proyecto Final ");
+
+    ventana.setVerticalSyncEnabled(true);
+
+
+
+
+    Font fuente;
+
+    fuente.loadFromFile("Gameplay.ttf");
+
+    Text txt_vida;
+
+    txt_vida.setFont(fuente);
+
+    txt_vida.setPosition(970, 635);
+
+    txt_vida.setCharacterSize(50);
+
+    //VARIABLES DEL MENU
+    Menu menu(ventana.getSize().x, ventana.getSize().y);
+    RectangleShape background;
+    background.setSize(Vector2f(ANCHO, ALTO));
+    Texture Maintexture;
+    Maintexture.loadFromFile("Background.png");
+    background.setTexture(&Maintexture);
+
+
+
+
+
+    // INSTANCIAR UN OBJETO DE TIPO PELOTA
+    Pelota pelota(10.f);
+    pelota.getShapePelota().setPosition(0, 300);
+
+    //SEPARACION, POSCION Y CANTIDAD DE BLOQUES
+
+    unsigned const int bloqueCantidad = 13;
+
+    Bloque bloques1[bloqueCantidad];
+    Bloque bloques2[bloqueCantidad];
+    Bloque bloques3[bloqueCantidad];
+    Bloque bloques4[bloqueCantidad];
+
+        for (size_t i = 0; i < bloqueCantidad; i++)
+        {
+            bloques1[i].setPosition(i * 84.f, 0.f);
+            bloques1[i].setTexturaRed();
+        }
+        for (size_t i = 0; i < bloqueCantidad; i++)
+        {
+            bloques2[i].setPosition(i * 84.f, 58.f);
+            bloques2[i].setTexturaBlue();
+        }
+        for (size_t i = 0; i < bloqueCantidad; i++)
+        {
+            bloques3[i].setPosition(i * 84.f, 116.f);
+            bloques3[i].setTexturaGreen();
+        }
+        for (size_t i = 0; i < bloqueCantidad; i++)
+        {
+            bloques4[i].setPosition(i * 84.f, 175.f);
+            bloques4[i].setTexturaPurple();
+        }
+
+
+    //RECORRE EL VECTOR Y OBTIENE LOS BOUNDS
+
+    while (ventana.isOpen())
+    {
+
+        //verificamos todos los eventos de la ventana
+        Event event;
+        while (ventana.pollEvent(event))
+        {
+            /*// "cierre solicitado" evento: cerramos la ventana
+            if (evento.type == sf::Event::Closed)
+                ventana.close();*/
+			switch (event.type)
+			{
+			case Event::KeyReleased:
+				switch (event.key.code)
+				{
+				case Keyboard::Up:
+					menu.MoveUp();
+					break;
+
+				case Keyboard::Down:
+					menu.MoveDown();
+					break;
+
+				case Keyboard::Return:
+					switch (menu.GetPressedItem())
+					{
+					case 0:
+                        if(menu[0].GetPressedItem)
+						break;
+					case 1:
+						cout << "Modo Otazo" << endl;
+						break;
+                    			case 2:
+						cout << "Record de puntajes" << endl;
+						break;
+					case 3:
+						ventana.close();
+						break;
+					}
+
+					break;
+				}
+
+				break;
+			case Event::Closed:
+				ventana.close();
+
+				break;
+
+			}
+
+        }
+
+        /*SoundBuffer jiji;
+
+        Sound sonido;
+
+        jiji.loadFromFile("AUN YO TE RECUERDO.wav");
+
+        sonido.setBuffer(&SoundBuffer jiji);
+
+        sonido.play();*/
+
+        obj1.Move();
+        pelota.mover();
+
+        //MOVIMIENTO DE LA PELOTA
+        if(pelota.getShapePelota().getPosition().y + pelota.getShapePelota().getRadius() > 720)
+        {
+            pelota.getShapePelota().setPosition(20,320);
+            vida -= 1;
+        }
+
+        if(pelota.getShapePelota().getPosition().y < 0)
+        {
+            pelota.getdireccionY(1);
+        }
+
+
+        if(pelota.getShapePelota().getPosition().x + pelota.getShapePelota().getRadius() > 1080)
+        {
+            pelota.getdireccionX(-1);
+        }
+
+        if(pelota.getShapePelota().getPosition().x < 0)
+        {
+            pelota.getdireccionX(1);
+        }
+
+        FloatRect barraBox = obj1.getShapeBarra().getGlobalBounds();
+        FloatRect pelotaBox = pelota.getShapePelota().getGlobalBounds();
+
+
+        if(pelotaBox.intersects(barraBox))
+        {
+            pelota.getdireccionY(-1);
+        }
+
+
+        //DESTRUCCION DE BLOQUES
+        //RECORRE EL VECTOR Y OBTIENE LOS BOUNDS
+        for(size_t i= 0; i < bloqueCantidad; i++)
+        {
+            bloques1[i].bordes();
+            bloques2[i].bordes();
+            bloques3[i].bordes();
+            bloques4[i].bordes();
+            if(pelotaBox.intersects(bloques1[i].bordes()))
+            {
+                bloques1[i].getBloqueShape().setPosition(3000, 3000);
+                pelota.getdireccionY(1);
+            }
+            if(pelotaBox.intersects(bloques2[i].bordes()))
+            {
+                bloques2[i].getBloqueShape().setPosition(3000, 3000);
+                pelota.getdireccionY(1);
+            }
+            if(pelotaBox.intersects(bloques3[i].bordes()))
+            {
+                bloques3[i].getBloqueShape().setPosition(3000, 3000);
+                pelota.getdireccionY(1);
+            }
+            if(pelotaBox.intersects(bloques4[i].bordes()))
+            {
+                bloques4[i].getBloqueShape().setPosition(3000, 3000);
+                pelota.getdireccionY(1);
+            }
+
+
+        }
+
+        ventana.draw(obj1.barraShape);
+        ventana.draw(pelota.getShapePelota());
+        txt_vida.setString(std::to_string(vida));
+        ventana.draw(txt_vida);
+
+
+        for(size_t i = 0; i < bloqueCantidad; i++)
+        {
+            bloques1[i].draw(ventana);
+            bloques2[i].draw(ventana);
+            bloques3[i].draw(ventana);
+            bloques4[i].draw(ventana);
+
+        }
+        if(vida < 1)
+        {
+            ventana.clear(Color::Black);
+
+            Font fuente2;
+
+            fuente2.loadFromFile("Gameplay.ttf");
+
+            Text txt_GameOver;
+
+            txt_GameOver.setFont(fuente2);
+
+            txt_GameOver.setPosition(330, 200);
+
+            txt_GameOver.setCharacterSize(70);
+
+            txt_GameOver.setFillColor(Color::Red);
+
+            txt_GameOver.setString("GAME OVER");
+
+            ventana.draw(txt_GameOver);
+
+
+
+
+
+        }
+
+        // mostramos ventana en la pantalla
+
+        ventana.draw(background);
+        menu.draw(ventana);
+        ventana.display();
+        ventana.clear();
+        ventana.clear();
+
+     }// al cerrar la ventana salto esta llave
+
+    return 0;//devuelvo el control al SO
+}
